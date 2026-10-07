@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GYAANDAAN • Computational Calculation Quiz</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#fff8ee;color:#3d2020}
+header{background:#701b35;color:#fff;text-align:center;padding:14px;position:sticky;top:0;z-index:10}
+h1{margin:0;font-size:22px}#timer{font-size:30px;font-weight:800;margin-top:4px}
+main{max-width:700px;margin:auto;padding:14px}.card{background:#fff;border-radius:18px;padding:18px;margin:12px 0;box-shadow:0 3px 14px #0001}
+input,select,button{width:100%;padding:13px;margin:7px 0;border-radius:11px;font-size:16px}
+input,select{border:1px solid #d7c3b5}button{border:0;background:#701b35;color:#fff;font-weight:700}
+.option{background:#fff8ee;color:#3d2020;border:1px solid #e3cdbb;text-align:left}
+.hidden{display:none!important}.badge{display:inline-block;padding:6px 10px;border-radius:20px;background:#f3dfc9;font-size:13px}
+.score{font-size:34px;text-align:center;font-weight:800}.small{font-size:13px;color:#666}
+.focus{padding:12px;background:#fff1dd;border-radius:12px}hr{border:0;border-top:1px solid #ead8c8;margin:16px 0}
+@media print{header{position:static}button{display:none}body{background:#fff}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+<header><h1>GYAANDAAN</h1><div>Computational Thinking • Calculation Challenge</div><div id="timer">05:00</div></header>
+<main>
+<section id="start" class="card">
+<h2>Think Before You Calculate</h2>
+<p>Basic operations • BODMAS • Negative numbers • Decimals • Fractions • Multiplication & Division</p>
+<p class="small"><b>Important:</b> Some options are deliberately close. Read the operation order carefully.</p>
+<input id="name" placeholder="Student Name"><input id="className" placeholder="Class (e.g. 7)"><input id="roll" placeholder="Roll Number"><input id="section" placeholder="Section">
+<select id="duration"><option value="2">2 Minutes</option><option value="3">3 Minutes</option><option value="4">4 Minutes</option><option value="5" selected>5 Minutes</option></select>
+<button id="startBtn">START QUIZ</button>
+<p class="small">Unlimited questions • Medium → Hard Level 1 • No negative marking • Skip allowed</p>
+</section>
+<section id="quiz" class="hidden"><div class="card">
+<div id="progress" class="small"></div><div id="level" class="badge"></div>
+<h2 id="question"></h2><div id="options"></div><button id="skipBtn">SKIP</button>
+</div></section>
+<section id="result" class="hidden"><div class="card"><h2>GYAANDAAN Analysis Report</h2><div id="summary"></div>
+<button onclick="window.print()">DOWNLOAD / SAVE REPORT AS PDF</button><button onclick="location.reload()">TRY AGAIN</button></div>
+<div class="card" id="review"></div></section>
+</main>
+<script>
+const BANK=[{"q": "Calculate: −8 + 15 − 6.", "o": ["−1", "1", "13", "−29"], "a": 1, "e": "Work from left to right: −8 + 15 = 7, then 7 − 6 = 1."}, {"q": "Calculate: −7 × 3 + 10.", "o": ["−31", "−11", "11", "31"], "a": 1, "e": "Multiply first: −7 × 3 = −21; then −21 + 10 = −11."}, {"q": "Calculate: 24 ÷ (−6) + 5.", "o": ["−9", "−1", "1", "9"], "a": 2, "e": "24 ÷ (−6) = −4; then −4 + 5 = 1."}, {"q": "Calculate: −18 ÷ 3 × (−2).", "o": ["−12", "−3", "6", "12"], "a": 3, "e": "Division and multiplication have equal priority. −18 ÷ 3 = −6; −6 × (−2) = 12."}, {"q": "Calculate: 20 − 4 × (−3).", "o": ["8", "32", "−32", "−8"], "a": 1, "e": "4 × (−3) = −12; 20 − (−12) = 32."}, {"q": "Calculate: −12 − (−5) × 2.", "o": ["−34", "−22", "−2", "−4"], "a": 1, "e": "First (−5) × 2 = −10; then −12 − (−10) = −2."}, {"q": "Calculate: 3.5 + 2 × 1.5.", "o": ["6.5", "5.5", "4.5", "3.5"], "a": 2, "e": "1.5 × 2 = 3; 3.5 + 3 = 6.5."}, {"q": "Calculate: 7.2 − 1.5 × 2.", "o": ["4.2", "5.7", "11.4", "8.7"], "a": 0, "e": "1.5 × 2 = 3; 7.2 − 3 = 4.2."}, {"q": "Calculate: −2.5 × 4 + 3.", "o": ["−13", "−7", "−3", "7"], "a": 1, "e": "−2.5 × 4 = −10; −10 + 3 = −7."}, {"q": "Calculate: 6.4 ÷ 0.8 − 2.", "o": ["4", "6", "8", "10"], "a": 1, "e": "6.4 ÷ 0.8 = 8; 8 − 2 = 6."}, {"q": "Calculate: 1/2 + 3 × 1/4.", "o": ["5/8", "3/4", "1 1/4", "2"], "a": 1, "e": "3 × 1/4 = 3/4; 1/2 + 3/4 = 5/4 = 1 1/4."}, {"q": "Calculate: 5/6 − 1/3 × 3/2.", "o": ["1/3", "1/2", "2/3", "1"], "a": 0, "e": "1/3 × 3/2 = 1/2; 5/6 − 1/2 = 1/3."}, {"q": "Calculate: −3/4 + 1/2 × 2.", "o": ["−1/4", "1/4", "1/2", "5/4"], "a": 2, "e": "1/2 × 2 = 1; −3/4 + 1 = 1/4."}, {"q": "Calculate: (−2.4 + 1.4) × 3.", "o": ["−3", "−1", "1", "3"], "a": 0, "e": "−2.4 + 1.4 = −1; −1 × 3 = −3."}, {"q": "Calculate: 12 − 2.5 × 4 + 3.", "o": ["−1", "5", "10", "25"], "a": 0, "e": "2.5 × 4 = 10; 12 − 10 + 3 = 5."}, {"q": "A shop sells 6 packs at ₹12.50 each. The customer gets ₹10 off. Pay?", "o": ["₹55", "₹60", "₹65", "₹85"], "a": 2, "e": "6 × ₹12.50 = ₹75; ₹75 − ₹10 = ₹65."}, {"q": "A student has ₹100. He buys 4 notebooks at ₹12.50 each and gets ₹5 back from a coupon. Money left?", "o": ["₹45", "₹50", "₹55", "₹60"], "a": 2, "e": "4 × ₹12.50 = ₹50; ₹100 − ₹50 + ₹5 = ₹55."}, {"q": "A lift is at −4. It rises 2.5 floors, then falls 1.5 floors. Where is it?", "o": ["−5", "−3", "0", "4"], "a": 1, "e": "−4 + 2.5 − 1.5 = −3."}, {"q": "A game score is −15. A player earns 3 points in each of 4 rounds, then loses 2. Final score?", "o": ["−7", "−5", "−3", "5"], "a": 1, "e": "4 × 3 = 12; −15 + 12 − 2 = −5."}, {"q": "Calculate: 18 ÷ 3 − 2 × (−4).", "o": ["−2", "2", "14", "22"], "a": 3, "e": "18 ÷ 3 = 6; 2 × (−4) = −8; 6 − (−8) = 14."}, {"q": "Calculate: (−6 + 2) ÷ 2 − 3.", "o": ["−5", "−1", "1", "5"], "a": 0, "e": "−6 + 2 = −4; −4 ÷ 2 = −2; −2 − 3 = −5."}, {"q": "Calculate: 0.6 ÷ 0.2 + 2 × (−3).", "o": ["−12", "−9", "−3", "9"], "a": 2, "e": "0.6 ÷ 0.2 = 3; 2 × (−3) = −6; 3 − 6 = −3."}, {"q": "Calculate: 3/5 ÷ 3 + 1/5.", "o": ["1/5", "2/5", "3/5", "4/5"], "a": 1, "e": "3/5 ÷ 3 = 1/5; 1/5 + 1/5 = 2/5."}, {"q": "Calculate: −1/2 × 4 − (−3).", "o": ["−5", "−1", "1", "5"], "a": 1, "e": "−1/2 × 4 = −2; −2 − (−3) = 1."}, {"q": "Calculate: 10 − [2 + 3 × (−2)].", "o": ["−4", "8", "14", "16"], "a": 2, "e": "3 × (−2) = −6; 2 + (−6) = −4; 10 − (−4) = 14."}, {"q": "A café has 8 cups of 0.25 L each. It serves 0.5 L. How many litres remain?", "o": ["0.5 L", "1.0 L", "1.5 L", "2.0 L"], "a": 1, "e": "8 × 0.25 = 2 L; 2 − 0.5 = 1.5 L."}, {"q": "A recipe needs 3/4 cup per batch. How much for 4 batches, then 1/2 cup is removed?", "o": ["2 cups", "2 1/2 cups", "3 cups", "3 1/2 cups"], "a": 1, "e": "4 × 3/4 = 3; 3 − 1/2 = 2 1/2 cups."}, {"q": "A worker earns ₹15.50 per item for 8 items, then spends ₹20. How much remains?", "o": ["₹84", "₹104", "₹124", "₹144"], "a": 1, "e": "8 × ₹15.50 = ₹124; ₹124 − ₹20 = ₹104."}, {"q": "Calculate: −2.4 ÷ 0.6 + 5 × (−1).", "o": ["−9", "−1", "1", "9"], "a": 0, "e": "−2.4 ÷ 0.6 = −4; 5 × (−1) = −5; total −9."}, {"q": "Calculate: 2 − 1/2 × (−4) − 3.", "o": ["−3", "1", "3", "7"], "a": 2, "e": "1/2 × (−4) = −2; 2 − (−2) − 3 = 1."}];
+let pool=[],i=0,correct=0,wrong=[],skipped=[],times=[],left=300,qStart=0,timer=null,done=false;
+const SHEET_URL="https://script.google.com/macros/s/AKfycbw_OP2iFeuWoFnSuTng4ObYlEQwI5jFlYHxvabHhzapeOFtRoHSGoZxfRQ4KGm1A2e2nw/exec";
+const $=id=>document.getElementById(id);
+function shuffle(a){return a.slice().sort(()=>Math.random()-.5)}
+function makePool(){let p=[];for(let r=0;r<25;r++)p=p.concat(BANK);return shuffle(p)}
+function clock(){$("timer").textContent=String(Math.floor(left/60)).padStart(2,"0")+":"+String(left%60).padStart(2,"0")}
+function start(){if(!$("name").value.trim()||!$("className").value.trim()||!$("roll").value.trim()||!$("section").value.trim()){alert("Please enter Student Name, Class, Roll Number and Section.");return}
+left=+$("duration").value*60;i=0;correct=0;wrong=[];skipped=[];times=[];done=false;pool=makePool();
+$("start").classList.add("hidden");$("quiz").classList.remove("hidden");clock();show();clearInterval(timer);
+timer=setInterval(()=>{left--;clock();if(left<=0)finish()},1000)}
+function show(){if(done)return;if(i>=pool.length)pool=makePool();let x=pool[i];qStart=Date.now();
+$("progress").textContent="Question "+(i+1)+" • Correct: "+correct+" • Skipped: "+skipped.length;
+$("level").textContent=i<6?"MEDIUM":i<14?"MEDIUM +":"HARD LEVEL 1";$("question").textContent=x.q;$("options").innerHTML="";
+x.o.forEach((v,n)=>{let b=document.createElement("button");b.className="option";b.textContent=v;b.onclick=()=>answer(n);$("options").appendChild(b)})}
+function answer(n){if(done)return;let x=pool[i],t=Math.max(1,Math.round((Date.now()-qStart)/1000));times.push(t);if(n===x.a)correct++;else wrong.push({...x,student:x.o[n],time:t});i++;show()}
+function skip(){if(done)return;let x=pool[i],t=Math.max(1,Math.round((Date.now()-qStart)/1000));times.push(t);skipped.push({...x,time:t});i++;show()}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function finish(){if(done)return;done=true;clearInterval(timer);$("quiz").classList.add("hidden");$("result").classList.remove("hidden");
+let attempted=correct+wrong.length,total=attempted+skipped.length,acc=attempted?Math.round(correct/attempted*100):0;
+let avg=times.length?Math.round(times.reduce((a,b)=>a+b,0)/times.length):0;
+let focus=acc<60?"Operation signs, BODMAS and basic calculation":acc<80?"Negative numbers, decimals/fractions and × ÷":"Speed, accuracy and mixed-operation reasoning";
+let payload={
+  timestamp:new Date().toLocaleString("en-IN"),
+  name:$("name").value.trim(),
+  className:$("className").value.trim(),
+  section:$("section").value.trim(),
+  roll:$("roll").value.trim(),
+  score:correct+" / "+total,
+  accuracy:acc+"%",
+  attempted:attempted,
+  correct:correct,
+  wrong:wrong.length,
+  skipped:skipped.length,
+  averageTime:avg+" sec",
+  focusArea:focus
+};
+fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)}).catch(()=>{});
+$("summary").innerHTML='<div class="score">'+correct+' / '+total+'</div><p><b>Attempted:</b> '+attempted+' • <b>Correct:</b> '+correct+' • <b>Skipped:</b> '+skipped.length+' • <b>Accuracy:</b> '+acc+'% • <b>Avg Time:</b> '+avg+'s</p><div class="focus"><b>Focus Area:</b> '+focus+'</div>';
+let h="<h3>Wrong / Skipped Questions</h3>";
+wrong.forEach((x,n)=>h+='<p><b>'+(n+1)+'. Wrong</b><br>'+esc(x.q)+'<br><span class="small">Your answer: '+esc(x.student)+' • Correct: '+esc(x.o[x.a])+' • Time: '+x.time+'s</span><br>'+esc(x.e)+'</p><hr>');
+skipped.forEach((x,n)=>h+='<p><b>'+(wrong.length+n+1)+'. Skipped</b><br>'+esc(x.q)+'<br><span class="small">Correct: '+esc(x.o[x.a])+' • Time: '+x.time+'s</span><br>'+esc(x.e)+'</p><hr>');
+$("review").innerHTML=h||"<p>Excellent — no wrong or skipped questions.</p>"}
+$("startBtn").onclick=start;$("skipBtn").onclick=skip;clock();
+</script></body></html>
