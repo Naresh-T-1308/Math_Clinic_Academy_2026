@@ -1,0 +1,85 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GYAANDAAN Class 6 Prime & Divisibility</title>
+<style>
+body{margin:0;background:#fff9ed;font-family:Arial;color:#29231f}header{background:#761832;color:white;text-align:center;padding:16px;position:sticky;top:0}h1{margin:0;font-size:23px}.wrap{max-width:720px;margin:auto;padding:15px}.card{background:white;border-radius:16px;padding:18px;margin:14px 0;box-shadow:0 4px 15px #0001}input,select{width:100%;padding:12px;margin:5px 0 10px;border:1px solid #ddd;border-radius:9px;font-size:16px}button{padding:12px 16px;border:0;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer}.primary{width:100%;background:#761832;color:white}.skip{background:#eee}.next{background:#24734b;color:white;flex:1}.timer{text-align:center;background:white;color:#761832;font-size:30px;font-weight:bold;padding:8px;border-radius:10px}.meta{display:flex;justify-content:space-between;color:#666}.badge{background:#f7e9c8;padding:5px 9px;border-radius:15px}.q{text-align:center;font-size:22px;font-weight:bold;line-height:1.5;margin:22px 0}.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}.opt{background:white;border:2px solid #ddd;text-align:left}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.stat{background:#faf5e8;padding:12px;text-align:center;border-radius:10px}.stat b{display:block;font-size:23px;color:#761832}.focus{background:#fff1d2;padding:12px;border-left:5px solid #c79a35}.review{padding:12px 0;border-top:1px solid #ddd}.hidden{display:none}@media(max-width:600px){.opts{grid-template-columns:1fr}.q{font-size:20px}}@media print{header,.noPrint{display:none}}
+canvas{max-width:100%}
+</style></head><body>
+<header><h1>GYAANDAAN</h1><div>Class 6 • Prime Numbers & Divisibility • Basic → Medium</div></header><div class="wrap">
+<section id="start" class="card"><h2>Prime & Divisibility Challenge</h2><p>No repeated questions. Short, interesting and slightly tricky.</p>
+<label>Name</label><input id="name"><label>Roll Number</label><input id="roll"><label>Section</label><input id="section"><label>Time</label><select id="duration"><option value="120">2 Minutes</option><option value="180">3 Minutes</option><option value="240">4 Minutes</option><option value="300" selected>5 Minutes</option></select><button class="primary" onclick="startQuiz()">START QUIZ</button></section>
+<section id="quiz" class="hidden"><div class="timer" id="timer">05:00</div><div class="card"><div class="meta"><span id="qnum"></span><span id="level" class="badge"></span></div><div id="question" class="q"></div><div id="options" class="opts"></div><div style="display:flex;gap:10px;margin-top:14px"><button class="skip" onclick="skip()">Skip</button><button class="next" onclick="next()">Next</button></div></div></section>
+<section id="result" class="hidden"><div class="card"><h2>Analysis Report</h2><p><b>Name:</b> <span id="rn"></span><br><b>Time:</b> <span id="rt"></span></p><div class="grid"><div class="stat"><b id="sc"></b>Score</div><div class="stat"><b id="ac"></b>Accuracy</div><div class="stat"><b id="at"></b>Attempted</div><div class="stat"><b id="co"></b>Correct</div><div class="stat"><b id="wr"></b>Wrong</div><div class="stat"><b id="sk"></b>Skipped</div></div><p>Average Time: <b id="av"></b></p><div class="focus"><b>Focus Area</b><br><span id="fo"></span></div></div>
+<div class="card"><h3>Analysis Picture</h3><canvas id="pic" width="900" height="1000"></canvas></div><div class="card"><h3>Wrong & Skipped Questions</h3><div id="review"></div></div><div class="card noPrint"><button class="primary" onclick="savePic()">DOWNLOAD ANALYSIS PICTURE</button><button class="primary" style="margin-top:10px;background:#9a6a19" onclick="savePDF()">DOWNLOAD WRONG & SKIPPED PDF</button></div></section></div>
+<script>
+const SHEET="https://script.google.com/macros/s/AKfycbw_OP2iFeuWoFnSuTng4ObYlEQwI5jFlYHxvabHhzapeOFtRoHSGoZxfRQ4KGm1A2e2nw/exec";
+let S={name:"",roll:"",sec:"",time:300,left:300,q:null,list:[],used:new Set(),timer:null,qs:0};
+const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,P=a=>a[R(0,a.length-1)],prime=n=>{if(n<2)return false;for(let i=2;i*i<=n;i++)if(n%i===0)return false;return true},sh=a=>a.sort(()=>Math.random()-.5);
+function pf(n){let r=[],d=2;while(n>1){while(n%d==0){r.push(d);n/=d}d++}return r}
+function question(){
+ let t=R(1,20),n,a,b,ans,text,tag,choices;
+ if(t==1){n=R(11,99);while(!prime(n))n++;ans="Prime";text=`Is ${n} prime or composite?`;tag="Prime checking";choices=["Prime","Composite","Neither","Both"]}
+ else if(t==2){n=R(20,99);while(prime(n))n++;ans="Composite";text=`A student calls ${n} a prime number. What is the correct label?`;tag="Prime vs composite";choices=["Prime","Composite","Neither","Both"]}
+ else if(t==3){n=P([24,36,48,54,60,72,84,90,96]);ans="Yes";text=`Can ${n} be divided exactly by 2?`;tag="Divisibility by 2";choices=["Yes","No","Only if prime","Cannot tell"]}
+ else if(t==4){n=R(101,999);ans=n%5==0?"Yes":"No";text=`Quick trap: Is ${n} divisible by 5?`;tag="Divisibility by 5";choices=["Yes","No","Only if even","Only if prime"]}
+ else if(t==5){n=R(100,999);let s=[...String(n)].reduce((a,b)=>a+ +b,0);ans=s%3==0?"Yes":"No";text=`Without dividing, decide: Is ${n} divisible by 3?`;tag="Divisibility by 3";choices=["Yes","No","Only if even","Only if it ends in 0"]}
+ else if(t==6){n=P([124,132,144,156,168,172,184,196,204,216]);let last=n%100;ans=last%4==0?"Yes":"No";text=`Only inspect the last two digits: Is ${n} divisible by 4?`;tag="Divisibility by 4";choices=["Yes","No","Only if digit sum is even","Cannot tell"]}
+ else if(t==7){n=R(100,999);ans=n%8==0?"Yes":"No";text=`Is ${n} divisible by 8? Check the last three digits.`;tag="Divisibility by 8";choices=["Yes","No","Only if even","Only if divisible by 4"]}
+ else if(t==8){n=R(100,999);ans=n%10==0?"Yes":"No";text=`A packet has ${n} stickers. Can they be split equally into groups of 10?`;tag="Divisibility by 10";choices=["Yes","No","Only if odd","Only if prime"]}
+ else if(t==9){n=R(100,999);ans=n%6==0?"Yes":"No";text=`Think twice: Is ${n} divisible by 6?`;tag="Divisibility by 6";choices=["Yes","No","Only if divisible by 5","Only if odd"]}
+ else if(t==10){n=P([24,36,48,60,72,84,96]);let q=n*R(2,4);ans="2 and 3";text=`For ${q} to be divisible by 6, which two tests must both work?`;tag="Divisibility reasoning";choices=["2 and 3","3 and 5","4 and 8","5 and 10"]}
+ else if(t==11){n=P([30,42,54,66,78,90,102,114]);let q=n+6;ans="Divisible by 2 and 3";text=`${q} is even and its digit sum is divisible by 3. Which conclusion follows?`;tag="Divisibility reasoning";choices=["Divisible by 2 and 3","Divisible only by 2","Divisible only by 3","Divisible by 5"]}
+ else if(t==12){n=P([24,30,36,42,48,54,60,72,84]);ans=n/6;let q=n*R(2,5);ans=q/6;text=`A teacher has ${q} cards and packs 6 in each group. How many groups?`;tag="Basic division";choices=[String(ans),String(ans+1),String(ans-1),String(ans+6)]}
+ else if(t==13){n=P([12,18,24,30,36,42,48,54,60]);let q=n*R(2,5);ans=q/3;text=`${q} ÷ 3 = ?`;tag="Division";choices=[String(ans),String(ans+2),String(ans-2),String(ans+3)]}
+ else if(t==14){a=R(12,25);b=R(2,7);ans=a*b;text=`A shop has ${a} trays with ${b} pencils each. Total pencils?`;tag="Arithmetic";choices=[String(ans),String(ans+b),String(ans-a),String(ans+1)]}
+ else if(t==15){n=P([36,48,60,72,84,96,108,120]);let f=pf(n);ans=f.join(" × ");text=`Prime factorization of ${n} is:`;tag="Prime factorization";choices=[ans,String(n),f[0]+" × "+(n/f[0]),f.join(" + ")]}
+ else if(t==16){n=P([42,60,72,90,120,150]);let f=pf(n);ans=f.join(" × ");text=`Break ${n} completely into prime factors. Which is correct?`;tag="Prime factorization";choices=[ans,n+" × 1",f[0]+" × "+(n/f[0]),f.join(" + ")]}
+ else if(t==17){n=P([25,35,45,55,65,75,85,95]);let q=n+R(1,4);ans=q+(5-q%5);text=`${q} is not divisible by 5. What is the next multiple of 5?`;tag="Divisibility by 5";choices=[String(ans),String(q+1),String(q+2),String(q+3)]}
+ else if(t==18){n=P([121,143,169,187,221,247]);ans=prime(n)?"Prime":"Composite";text=`Don't judge by appearance. Is ${n} prime or composite?`;tag="Prime checking";choices=["Prime","Composite","Even","Multiple of 10"]}
+ else if(t==19){n=P([16,24,32,40,48,56,64,72,80,88]);let q=n*R(2,4);ans="last 3 digits";text=`To test ${q} for divisibility by 8, which part is enough to inspect?`;tag="Divisibility by 8";choices=["last 3 digits","last digit","first 3 digits","digit sum"]}
+ else{n=P([120,132,144,156,168,180]);let q=n*R(2,4);ans="2 and 3";text=`${q} is divisible by 6. Which pair explains why?`;tag="Divisibility by 6";choices=["2 and 3","4 and 5","5 and 10","3 and 8"]}
+ let key=text;if(S.used.has(key))return question();S.used.add(key);return{text,ans:String(ans),choices:sh(choices),tag,level:S.list.length<6?"Basic":S.list.length<14?"Basic+":"Medium"}}
+function startQuiz(){
+  const nameEl=document.getElementById("name");
+  const rollEl=document.getElementById("roll");
+  const sectionEl=document.getElementById("section");
+  const durationEl=document.getElementById("duration");
+  const startEl=document.getElementById("start");
+  const quizEl=document.getElementById("quiz");
+  let n=nameEl.value.trim(),r=rollEl.value.trim(),s=sectionEl.value.trim();
+  if(!n||!r||!s){alert("Please enter Name, Roll Number and Section.");return;}
+  S.name=n;S.roll=r;S.sec=s;S.time=S.left=+durationEl.value;
+  startEl.classList.add("hidden");
+  quizEl.classList.remove("hidden");
+  document.getElementById("timer").textContent=new Date(S.left*1000).toISOString().substr(14,5);
+  next();
+  S.timer=setInterval(tick,1000);
+}
+function tick(){
+  S.left--;
+  document.getElementById("timer").textContent=new Date(Math.max(0,S.left)*1000).toISOString().substr(14,5);
+  if(S.left<=0)finish();
+}
+function next(){
+  if(S.q&&S.q.selected===undefined)skip(true);
+  S.q=question();S.qs=Date.now();
+  document.getElementById("qnum").textContent="Question "+(S.list.length+1);
+  document.getElementById("level").textContent=S.q.level;
+  const questionEl=document.getElementById("question");
+  const box=document.getElementById("options");
+  questionEl.textContent=S.q.text;
+  box.innerHTML="";
+  S.q.choices.forEach(v=>{
+    let b=document.createElement("button");
+    b.className="opt";b.type="button";b.textContent=v;
+    b.onclick=()=>answer(v);box.appendChild(b);
+  });
+}
+function answer(v){if(S.q.selected!==undefined)return;S.q.selected=v;S.q.time=(Date.now()-S.qs)/1000;S.q.status=v===S.q.ans?"correct":"wrong";S.list.push(S.q);document.querySelectorAll(".opt").forEach(x=>x.disabled=true)}
+function skip(auto){if(S.q&&S.q.selected===undefined){S.q.selected=null;S.q.time=(Date.now()-S.qs)/1000;S.q.status="skipped";S.list.push(S.q)}if(!auto)next()}
+function focus(){let c={};S.list.filter(q=>q.status!="correct").forEach(q=>c[q.tag]=(c[q.tag]||0)+1);let a=Object.entries(c).sort((x,y)=>y[1]-x[1]).slice(0,3);return a.length?a.map(x=>x[0]).join(", "):"Keep practising for speed and accuracy"}
+function finish(){clearInterval(S.timer);if(S.q&&S.q.selected===undefined)skip(true);quiz.classList.add("hidden");result.classList.remove("hidden");let total=S.list.length,co=S.list.filter(q=>q.status=="correct").length,wr=S.list.filter(q=>q.status=="wrong").length,sk=S.list.filter(q=>q.status=="skipped").length,at=co+wr,av=total?S.list.reduce((a,q)=>a+q.time,0)/total:0;sc.textContent=co;ac.textContent=at?Math.round(co/at*100)+"%":"0%";document.getElementById("attempted").textContent=at;document.getElementById("co").textContent=co;document.getElementById("wr").textContent=wr;document.getElementById("sk").textContent=sk;document.getElementById("av").textContent=av.toFixed(1)+" sec/question";fo.textContent=focus();rn.textContent=S.name+" (Roll "+S.roll+", "+S.sec+")";rt.textContent=Math.round(S.time/60)+" minutes";renderReview();draw();sendSheet({name:S.name,roll:S.roll,section:S.sec,className:"Class 6",topic:"Prime Numbers & Divisibility",score:co,total,correct:co,wrong:wr,skipped:sk,accuracy:at?Math.round(co/at*100):0,averageTime:+av.toFixed(1),focusArea:focus(),timestamp:new Date().toISOString()})}
+function renderReview(){review.innerHTML="";S.list.filter(q=>q.status!="correct").forEach((q,i)=>{let d=document.createElement("div");d.className="review";d.innerHTML="<b>"+q.text+"</b><br>Correct: <strong>"+q.ans+"</strong><br>Your answer: "+(q.status=="skipped"?"Skipped":q.selected)+"<br>Time: "+q.time.toFixed(1)+" sec<br><small>Focus: "+q.tag+"</small>";review.appendChild(d)})}
+function draw(){let c=pic,x=c.getContext("2d");x.fillStyle="#fff9ed";x.fillRect(0,0,c.width,c.height);x.fillStyle="#761832";x.fillRect(0,0,900,130);x.fillStyle="white";x.font="bold 42px Arial";x.fillText("GYAANDAAN",45,60);x.font="23px Arial";x.fillText("Class 6 • Prime & Divisibility",45,100);x.fillStyle="#29231f";x.font="bold 30px Arial";x.fillText("Analysis Report",45,180);x.font="21px Arial";x.fillText("Name: "+S.name,45,220);x.fillText("Roll: "+S.roll+"   Section: "+S.sec,45,255);x.fillText("Time: "+Math.round(S.time/60)+" minutes",45,290);let co=S.list.filter(q=>q.status=="correct").length,wr=S.list.filter(q=>q.status=="wrong").length,sk=S.list.filter(q=>q.status=="skipped").length,at=co+wr,acc=at?Math.round(co/at*100):0,vals=[["Score",co],["Accuracy",acc+"%"],["Attempted",at],["Correct",co],["Wrong",wr],["Skipped",sk]];vals.forEach((v,i)=>{let xx=45+(i%2)*405,yy=330+Math.floor(i/2)*100;x.fillStyle="#faf5e8";x.fillRect(xx,yy,370,75);x.fillStyle="#761832";x.font="bold 29px Arial";x.fillText(v[1],xx+18,yy+43);x.fillStyle="#29231f";x.font="20px Arial";x.fillText(v[0],xx+115,yy+43)});x.fillStyle="#fff1d2";x.fillRect(45,660,780,110);x.fillStyle="#29231f";x.font="bold 23px Arial";x.fillText("Focus Area",65,700);x.font="19px Arial";x.fillText(focus(),65,738);x.fillStyle="#666";x.font="18px Arial";x.fillText("Wrong & skipped questions are available in the PDF.",45,850)}
+function savePic(){let a=document.createElement("a");a.download="GYAANDAAN_Analysis_"+S.name.replace(/\\s+/g,"_")+".png";a.href=pic.toDataURL("image/png");a.click()}
+function savePDF(){let bad=S.list.filter(q=>q.status!="correct"),w=window.open("","_blank");if(!w)return alert("Allow pop-ups to create the PDF.");w.document.write("<html><head><title>GYAANDAAN Wrong Questions</title><style>body{font-family:Arial;padding:30px}h1{color:#761832}.q{border-top:1px solid #ddd;padding:14px 0}</style></head><body><h1>GYAANDAAN – Class 6</h1><h2>Wrong & Skipped Questions</h2><p><b>Name:</b> "+S.name+"<br><b>Roll:</b> "+S.roll+"<br><b>Section:</b> "+S.sec+"<br><b>Time:</b> "+Math.round(S.time/60)+" minutes</p>"+(bad.length?bad.map((q,i)=>"<div class=q><b>Q"+(i+1)+". "+q.text+"</b><br>Correct Answer: <b>"+q.ans+"</b><br>Your Answer: "+(q.status=="skipped"?"Skipped":q.selected)+"<br>Time: "+q.time.toFixed(1)+" sec<br>Focus: "+q.tag+"</div>").join(""):"<p>No wrong or skipped questions.</p>")+"</body></html>");w.document.close();setTimeout(()=>w.print(),400)}
+function sendSheet(d){fetch(SHEET,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(d)}).catch(()=>{})}
+</script></body></html>
