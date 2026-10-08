@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GYAANDAAN – Arithmetic Expressions Quiz</title>
+<style>
+:root{--maroon:#761832;--gold:#c99a35;--cream:#fff9ed;--ink:#29231f;--green:#23734b;--red:#b63b3b}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);font-family:Arial,sans-serif;color:var(--ink)}
+header{background:linear-gradient(135deg,#69152e,#9c3150);color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:10}
+header h1{margin:0;font-size:23px}header p{margin:5px 0 0;font-size:13px}
+.wrap{max-width:760px;margin:auto;padding:16px}.card{background:#fff;border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 5px 18px #00000012}
+label{font-weight:700;font-size:14px;display:block;margin:10px 0 5px}input,select{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:16px}
+button{border:0;border-radius:12px;padding:12px 18px;font-size:16px;font-weight:700;cursor:pointer}
+.primary{background:var(--maroon);color:#fff;width:100%}.skip{background:#eee;color:#333}.next{background:var(--green);color:#fff;flex:1}
+.timer{font-size:30px;font-weight:800;color:var(--maroon);text-align:center;background:#fff;padding:8px;border-radius:12px;margin-bottom:10px}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:#666}.qtext{font-size:24px;font-weight:800;line-height:1.5;margin:18px 0;text-align:center}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px}.opt{background:#fff;border:2px solid #ddd;text-align:left}.opt:hover{border-color:var(--gold)}.opt:disabled{opacity:.75}
+.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#f7e9c8;color:#704d0c;font-size:12px;font-weight:700}
+.hidden{display:none}.resultGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{background:#faf5e8;border-radius:12px;padding:14px;text-align:center}.stat b{font-size:24px;display:block;color:var(--maroon)}
+.focus{padding:12px;background:#fff1d2;border-left:5px solid var(--gold);border-radius:8px}.review{border-top:1px solid #eee;padding:14px 0}
+@media(max-width:600px){.options{grid-template-columns:1fr}.qtext{font-size:21px}}
+@media print{header,.noPrint{display:none!important}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+<header><h1>GYAANDAAN</h1><p>Arithmetic Expressions • Basic → Medium • Unlimited Questions</p></header>
+<div class="wrap">
+<section id="start" class="card">
+<h2>Arithmetic Expressions Quiz</h2>
+<p>Read carefully. Think about the order of operations before choosing your answer.</p>
+<label>Student Name</label><input id="name">
+<label>Roll Number</label><input id="roll">
+<label>Section</label><input id="section">
+<label>Time</label>
+<select id="duration"><option value="120">2 Minutes</option><option value="180">3 Minutes</option><option value="240">4 Minutes</option><option value="300" selected>5 Minutes</option></select>
+<button class="primary" onclick="startQuiz()">START QUIZ</button>
+</section>
+
+<section id="quiz" class="hidden">
+<div class="timer" id="timer">05:00</div>
+<div class="card">
+<div class="meta"><span id="qnum">Question 1</span><span id="difficulty" class="badge">Basic</span></div>
+<div class="qtext" id="question"></div>
+<div class="options" id="options"></div>
+<div style="display:flex;gap:10px;margin-top:14px">
+<button class="skip" onclick="skipQ()">Skip</button><button class="next" onclick="nextQ()">Next</button>
+</div>
+</div>
+</section>
+
+<section id="result" class="hidden">
+<div class="card"><h2>Quiz Analysis</h2>
+<div class="resultGrid">
+<div class="stat"><b id="score">0</b>Score</div><div class="stat"><b id="accuracy">0%</b>Accuracy</div>
+<div class="stat"><b id="attempted">0</b>Attempted</div><div class="stat"><b id="correct">0</b>Correct</div>
+<div class="stat"><b id="wrong">0</b>Wrong</div><div class="stat"><b id="skipped">0</b>Skipped</div>
+</div>
+<p><b>Average Time:</b> <span id="avg"></span></p>
+<div class="focus"><b>Focus Area:</b><br><span id="focus"></span></div>
+</div>
+<div class="card"><h3>Wrong & Skipped Questions</h3><div id="review"></div></div>
+<div class="card noPrint">
+<button class="primary" onclick="window.print()">DOWNLOAD / SAVE AS PDF</button>
+<button class="primary" style="margin-top:10px;background:#444" onclick="location.reload()">RESTART</button>
+</div>
+</section>
+</div>
+
+<script>
+const SHEET_URL="https://script.google.com/macros/s/AKfycbw_OP2iFeuWoFnSuTng4ObYlEQwI5jFlYHxvabHhzapeOFtRoHSGoZxfRQ4KGm1A2e2nw/exec";
+let S={name:"",roll:"",section:"",duration:300,timeLeft:300,current:null,answered:[],used:new Set(),qStart:0,timer:null};
+
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function pick(a){return a[rand(0,a.length-1)]}
+function shuffle(a){return a.sort(()=>Math.random()-0.5)}
+function make(){
+ let level=S.answered.length<5?"Basic":S.answered.length<12?"Basic+":"Medium";
+ let t=rand(1,16),a,b,c,d,ans,text,tag;
+ if(t===1){a=rand(8,45);b=rand(2,15);c=rand(2,12);ans=a+b*c;text=`${a} + ${b} × ${c} = ?`;tag="Order of operations"}
+ else if(t===2){a=rand(20,90);b=rand(2,12);c=rand(2,9);ans=a-b*c;text=`${a} − ${b} × ${c} = ?`;tag="Order of operations"}
+ else if(t===3){a=rand(8,45);b=rand(2,15);c=rand(2,9);ans=(a+b)*c;text=`(${a} + ${b}) × ${c} = ?`;tag="Brackets"}
+ else if(t===4){a=rand(5,18);b=rand(2,12);c=rand(2,10);ans=a*(b+c);text=`${a} × (${b} + ${c}) = ?`;tag="Brackets"}
+ else if(t===5){a=rand(4,15);b=rand(3,12);c=rand(2,9);ans=a*b+c;text=`${a} × ${b} + ${c} = ?`;tag="Multiplication first"}
+ else if(t===6){a=rand(4,15);b=rand(3,12);c=rand(2,9);ans=a+b*c;text=`${a} + ${b} × ${c} = ?`;tag="Multiplication first"}
+ else if(t===7){a=rand(20,90);b=rand(2,10);c=rand(2,9);ans=(a-b)*c;text=`(${a} − ${b}) × ${c} = ?`;tag="Brackets"}
+ else if(t===8){a=rand(20,90);b=rand(2,10);c=rand(2,9);ans=a-b+c;text=`${a} − ${b} + ${c} = ?`;tag="Left-to-right"}
+ else if(t===9){a=rand(3,12);b=rand(3,12);c=rand(2,8);d=rand(1,9);ans=a*b+c*d;text=`${a} × ${b} + ${c} × ${d} = ?`;tag="Two-step calculation"}
+ else if(t===10){a=rand(3,12);b=rand(2,10);c=rand(2,8);ans=(a+b)*c;text=`A teacher says: “Add ${a} and ${b}, then multiply the result by ${c}.” What is the answer?`;tag="Words to expression"}
+ else if(t===11){a=rand(20,80);b=rand(2,9);c=rand(2,8);ans=a+b*c;text=`A shop bill is ${a} + ${b} groups of ${c}. What total does the expression give?`;tag="Real-life expression"}
+ else if(t===12){a=rand(4,14);b=rand(3,12);c=rand(2,9);ans=a*b-c;text=`Riya writes ${a} × ${b} − ${c}. What value should she get?`;tag="Calculation"}
+ else if(t===13){a=rand(10,50);b=rand(2,9);c=rand(2,8);ans=a-(b+c);text=`${a} − (${b} + ${c}) = ?`;tag="Brackets"}
+ else if(t===14){a=rand(30,100);b=rand(2,9);c=rand(2,9);ans=(a-b)+c;text=`Start with ${a}. Subtract ${b}. Then add ${c}. What is the result?`;tag="Step-by-step calculation"}
+ else if(t===15){a=rand(3,12);b=rand(2,10);c=rand(2,9);ans=a*(b-c);text=`${a} × (${b} − ${c}) = ?`;tag="Brackets"}
+ else{a=rand(20,80);b=rand(2,9);c=rand(2,9);ans=a-b*c;text=`A student says ${a} − ${b} × ${c} means “subtract first, then multiply.” What is the correct value of the expression?`;tag="Common mistake"}
+
+ if(S.used.has(text)) return make(); S.used.add(text);
+ let opts=new Set([ans]), guard=0;
+ while(opts.size<4&&guard++<200){let v=ans+pick([-15,-12,-9,-7,-5,-3,-2,2,3,5,7,9,12,15]);opts.add(v)}
+ return {text,ans,opts:shuffle([...opts]),tag,level}
+}
+function startQuiz(){
+ const startEl=document.getElementById("start"), quizEl=document.getElementById("quiz");
+ const nameEl=document.getElementById("name"), rollEl=document.getElementById("roll"), sectionEl=document.getElementById("section"), durationEl=document.getElementById("duration");
+ let n=nameEl.value.trim(),r=rollEl.value.trim(),s=sectionEl.value.trim();
+ if(!n||!r||!s){alert("Please enter Name, Roll Number and Section.");return}
+ S.name=n;S.roll=r;S.section=s;S.duration=+durationEl.value;S.timeLeft=S.duration;
+ startEl.classList.add("hidden");quizEl.classList.remove("hidden");nextQ();S.timer=setInterval(tick,1000)
+}
+function tick(){S.timeLeft--;document.getElementById("timer").textContent=new Date(Math.max(0,S.timeLeft)*1000).toISOString().substr(14,5);if(S.timeLeft<=0)finish()}
+function nextQ(){
+ if(S.current&&S.current.selected===undefined)skipQ(true);
+ S.current=make();S.qStart=Date.now();qnum.textContent="Question "+(S.answered.length+1);difficulty.textContent=S.current.level;
+ question.textContent=S.current.text;options.innerHTML="";
+ S.current.opts.forEach(v=>{let b=document.createElement("button");b.className="opt";b.textContent=v;b.onclick=()=>answer(v);options.appendChild(b)})
+}
+function answer(v){
+ if(S.current.selected!==undefined)return;
+ S.current.selected=v;S.current.time=(Date.now()-S.qStart)/1000;S.current.status=v===S.current.ans?"correct":"wrong";S.answered.push(S.current);
+ [...document.querySelectorAll(".opt")].forEach(x=>x.disabled=true)
+}
+function skipQ(auto=false){
+ if(S.current&&S.current.selected===undefined){S.current.selected=null;S.current.time=(Date.now()-S.qStart)/1000;S.current.status="skipped";S.answered.push(S.current)}
+ if(!auto)nextQ()
+}
+function focus(){
+ let c={};S.answered.filter(q=>q.status!=="correct").forEach(q=>c[q.tag]=(c[q.tag]||0)+1);
+ let a=Object.entries(c).sort((x,y)=>y[1]-x[1]).slice(0,3);
+ return a.length?a.map(x=>x[0]).join(", "):"Keep building speed and accuracy"
+}
+function finish(){
+ if(S.timer)clearInterval(S.timer);if(S.current&&S.current.selected===undefined)skipQ(true);
+ document.getElementById("quiz").classList.add("hidden");document.getElementById("result").classList.remove("hidden");
+ let total=S.answered.length,correct=S.answered.filter(q=>q.status==="correct").length,wrong=S.answered.filter(q=>q.status==="wrong").length,sk=S.answered.filter(q=>q.status==="skipped").length,attempted=correct+wrong;
+ let av=total?S.answered.reduce((x,q)=>x+q.time,0)/total:0;
+ score.textContent=correct;accuracy.textContent=attempted?Math.round(correct/attempted*100)+"%":"0%";attemptedEl=attempted;
+ document.getElementById("attempted").textContent=attempted;document.getElementById("correct").textContent=correct;document.getElementById("wrong").textContent=wrong;document.getElementById("skipped").textContent=sk;avg.textContent=av.toFixed(1)+" sec/question";focusEl=document.getElementById("focus");focusEl.textContent=focus();
+ review.innerHTML="";
+ S.answered.filter(q=>q.status!=="correct").forEach((q,i)=>{let d=document.createElement("div");d.className="review";d.innerHTML=`<b>${q.text}</b><br>Correct answer: <strong>${q.ans}</strong><br>Your answer: <strong>${q.status==="skipped"?"Skipped":q.selected}</strong><br>Time: ${q.time.toFixed(1)} sec<br><small>Focus: ${q.tag}. Check the order of operations carefully.</small>`;review.appendChild(d)});
+ sendSheet({name:S.name,roll:S.roll,section:S.section,className:"",score:correct,total,correct,wrong,skipped:sk,accuracy:attempted?Math.round(correct/attempted*100):0,averageTime:+av.toFixed(1),focusArea:focus(),timestamp:new Date().toISOString()})
+}
+function sendSheet(d){fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(d)}).catch(()=>{})}
+</script>
+</body></html>
